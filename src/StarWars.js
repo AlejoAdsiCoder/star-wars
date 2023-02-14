@@ -59,7 +59,13 @@ export class StarWars extends LitElement {
         type: String,
       },
       details: {
-        type: String
+        type: String,
+      },
+      title: {
+        type: String,
+      },
+      expandable: {
+        type: Boolean,
       }
     };
   }
@@ -80,6 +86,8 @@ export class StarWars extends LitElement {
     this.page = 0;
     this.movie = '';
     this.details = [];
+    this.title = '';
+    this.expandable = false;
   }
 
   setCharacters(event) {
@@ -94,9 +102,14 @@ export class StarWars extends LitElement {
   }
 
   setMovies(event) {
-    console.log("event", event.detail.data.results)
+    let arraynew = [];
+    arraynew.push(event.detail.data.title)
+    console.log(event.detail.data.title)
+    /* this.title = event.detail.data.title; */
+    /* let myarray */
+    /* console.log("event", event.detail.data.results)
     this.movies.push(event.detail.data.results[0])
-    console.log("setMovies", this.movies)
+    console.log("setMovies", this.movies) */
     
 
     //console.log(this.detail.data.results.title  )
@@ -114,7 +127,7 @@ export class StarWars extends LitElement {
 
   onImg(dataImg) {
     this.image = `https://starwars-visualguide.com/assets/img/characters/${this._getId(dataImg)}.jpg`
-    console.log(this.image)
+    //console.log(this.image)
     
   }
 
@@ -147,6 +160,10 @@ export class StarWars extends LitElement {
     //console.log("detail: ", this.details[2])
   }
 
+  handlExpandable() {
+    this.expandable = !this.expandable;
+  }
+ 
   previousClick(event) {
     console.log(event.detail)
     this.path = `api/people/?page=${event.detail}`;
@@ -161,22 +178,21 @@ export class StarWars extends LitElement {
     ${this.characters.map((Character) => {  
       return html`
       ${this.onImg(Character.url)}
-      <bbva-web-card-product heading="Headline 1" badge-text="${Character.name}" image="${this.image}">
+      <bbva-web-card-product heading="${Character.name}" badge-text="${Character.name}" image="${this.image}">
           <div class="horizontal" role="list" slot="options">
             <bbva-web-item-bullet>Genero: ${Character.gender}</bbva-web-item-bullet>
           </div>
-            <bbva-expandable-accordion slot="option" row-title="${Character.name}" >
-              ${this._handleResultFilms(Character.films)}
-              ${this.details[0].map(detail => {
-                let pathname = new URL(detail).pathname;
-                const trimSlashes = str => str.split('/').filter(v => v !== '').join('/');
-                pathname = trimSlashes(pathname)
-                html`
-                  
-                <rick-and-morty-dm @success-response-api="${this.setMovies}" _host="${detail}" _method="${this.method}" _path="${this.pathtwo}"></rick-and-morty-dm>
-                `
-                console.log("detailmap:", detail)
-              })}
+            <bbva-expandable-accordion @expandable-accordion-open-change="${this.handlExpandable}" slot="option" row-title="Details" >
+            // Hay que pasar esto a un componente
+              ${this.expandable ? html`
+                ${Character.films.map((film, index) => {
+                  return html`
+                  <h1>${film}</h1>
+                  <rick-and-morty-dm @success-response-api="${this.setMovies}" _host="${film}" _method="${this.method}" _path=""></rick-and-morty-dm>
+                  `;
+                } )}
+              `: ``}
+            //
               
             <p>Color de ojos: ${Character.eye_color}</p>
             <p>Año de nacimiento: ${Character.birth_year}</p>
